@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import  {useState, useEffect } from "react";
 import "../Styles/Sports.css";
 import API_URL from "../API_URL.JS";
 
 function Sports() {
-
     const [data, setData] = useState([]);
+    const [id, setId]=useState("");
+    const [name,setName]=useState("");
+    
 
     useEffect(() => {
         fetch(API_URL + "/Sports/getSports?parameter=''")
@@ -23,9 +25,19 @@ function Sports() {
             });
     }, []);
 
-    const OpenModal=()=>{
-
+    const OpenModal=(action, item)=>{
+        if(action==="New"){
+            setId("New");
+            setName("");
+        }else{
+            if(action==="Modify"){
+                setId(item.Id);
+                setName(item.Name);
+            }
+        }
     }
+
+
 
     return (
         <>
@@ -35,7 +47,7 @@ function Sports() {
                 <div className="searchContainer">
                     <label>Search:</label>
                     <input type="text" placeholder="..." className="form-control" />
-                    <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">New</button>
+                    <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal" onClick={()=>OpenModal("New","")}>New</button>
                 </div>
 
                 <table className="table table-hover">
@@ -52,7 +64,7 @@ function Sports() {
                                 <th scope="row">{item.Id}</th>
                                 <td>{item.Name}</td>
                                 <td>
-                                    <button className="btn btn-warning" onClick={()=>OpenModal()}>Modify</button>
+                                    <button className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#myModal" onClick={()=>OpenModal("Modify",item)}>Modify</button>
                                     <button className="btn btn-danger">Delete</button>
                                 </td>
                             </tr>
@@ -73,11 +85,11 @@ function Sports() {
                         <div className="modal-body">
                             <div className="modalInputsContainer">
                                 <label className="col-md-2">Id:</label>
-                                <input type="text" placeholder="..." className="form-control" />
+                                <input type="text" placeholder="..." className="form-control" id="inputId" value={id} readOnly/>
                             </div>
                             <div className="modalInputsContainer">
-                                <label className="col-md-2">Nombre:</label>
-                                <input type="text" placeholder="..." className="form-control" />
+                                <label className="col-md-2">Name:</label>
+                                <input type="text" placeholder="..." className="form-control" id="inputName" value={name} onChange={(event)=>setName(event.target.value)}/>
                             </div>
                         </div>
                         <div className="modal-footer">
@@ -87,10 +99,7 @@ function Sports() {
                     </div>
                 </div>
             </div>
-
         </>
-
-
     )
 }
 export default Sports;
