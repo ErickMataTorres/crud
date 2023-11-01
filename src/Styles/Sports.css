@@ -1,0 +1,19 @@
+.searchContainer{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+}
+.searchContainer label, input{
+    margin-right:2%;
+}
+td button:first-child{
+    margin-right:2%;
+}
+.modalInputsContainer{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+}
+.modal-body div:not(:first-child){
+    margin-top:2%;
+}
