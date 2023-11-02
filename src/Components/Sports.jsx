@@ -8,6 +8,7 @@ function Sports() {
     const [id, setId] = useState("");
     const [name, setName] = useState("");
     const btnCloseModal = useRef(null);
+    const [globalActions, setGlobalActions]=useState("");
 
     useEffect(() => {
         const parameter = "";
@@ -28,71 +29,82 @@ function Sports() {
 
     const OpenModal = (action, item) => {
         if (action === "New") {
-            document.getElementById("exampleModalLabel").innerText = action;
+            setGlobalActions("New");
             setId("New");
             setName("");
         } else {
             if (action === "Modify") {
-                document.getElementById("exampleModalLabel").innerText = action;
+                setGlobalActions("Modify");
+                // document.getElementById("exampleModalLabel").innerText = action;
                 setId(item.Id);
                 setName(item.Name);
+            } else {
+
+                setId(item.Id);
+                setName(item.Name);
+                setGlobalActions("Delete");
+
+                // const modalBody=document.getElementById("modalBody");
+
+                // modalBody.innerText=`Are you sure that you want to delete the register?\nId: ${item.Id}\nNombre: ${item.Name}`;
+
+
             }
         }
+        document.getElementById("exampleModalLabel").innerText = action;
+        document.getElementById("btnActions").innerText = action;
     }
 
     const ClickAction = () => {
+        if(globalActions==="New"||globalActions==="Modify"){
 
-        fetch(API_URL + `/Sports/SaveSport?Id=${id}&Name=${name}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Se ha producido un error");
+
+            fetch(API_URL + `/Sports/SaveSport?Id=${id}&Name=${name}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Se ha producido un error");
+                    }
+                    return response.json();
+                })
+                .then((response) => {
+                    if (response === "Modificado") {
+                        data.map(element => {
+                            if (element.Id === id) {
+                                element.Name = name;
+                                setData([...data]);
+                                btnCloseModal.current.click();
+                            }
+                        })
+                    } else {
+                        const newRegister = { Id: response, Name: name };
+                        setData([...data, newRegister]);
+                        btnCloseModal.current.click();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error en la solicitud: ", error);
+                });
+        }else{
+            
+            fetch(API_URL+`/Sports/DeleteSport?Id=${id}`)
+            .then((response)=>{
+                if(!response.ok){
+                    throw new Error("Se ha producido un error al eliminar");
                 }
                 return response.json();
             })
-            .then((response) => {
-                if(response==="Modificado"){
-    
-                    data.map(element=>{
-                        if(element.Id===id){
-                            element.Name=name;
-                            setData([...data]);
-                            btnCloseModal.current.click();
-                        }  
-                    })
-                }else{
-                    const newRegister = { Id: response, Name: name };
-                    setData([...data, newRegister]);
+            .then((response)=>{
+                if(response==="Ok"){
+                    const deleteSport=data.filter((prevData)=>prevData.Id!==id);
+                    setData(deleteSport);
                     btnCloseModal.current.click();
                 }
             })
-            .catch((error) => {
-                console.error("Error en la solicitud: ", error);
+            .catch((error)=>{
+                console.error("Error al eliminar: ", error);
             });
 
-
-        // fetch(API_URL+"/Sports/SaveSport",{
-        //     method:"POST",
-        //     headers:{
-        //         "Content-Type":"application/json"
-        //     },
-        //     body:JSON.stringify({Id: id , Name: name})
-        // })
-        // .then(response => response.json())
-        // .then(response=>{
-        //     if(response==="Modificado"){
-        //         data.map(prevData=>{
-        //             prevData.Id===data.Id?{...prevData, ...data}:prevData
-        //         })
-        //         btnCloseModal.current.click();
-        //     }else{
-        //         const newRegister={Id:response, Name:name};
-        //         setData([...data, newRegister]);
-        //         btnCloseModal.current.click();
-        //     }
-        // })
-        // .catch(error=>{
-        //     console.error("Ha ocurrido un error: ", error);
-        // });
+        }
     }
 
 
@@ -123,7 +135,7 @@ function Sports() {
                                 <td>{item.Name}</td>
                                 <td>
                                     <button className="btn btn-warning" data-bs-toggle="modal" data-bs-target="#myModal" onClick={() => OpenModal("Modify", item)}>Modify</button>
-                                    <button className="btn btn-danger">Delete</button>
+                                    <button className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" onClick={() => OpenModal("Delete", item)}>Delete</button>
                                 </td>
                             </tr>
                         ))}
@@ -140,7 +152,8 @@ function Sports() {
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Modal Title</h1>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div className="modal-body">
+                        <div className="modal-body" id="modalBody">
+
                             <div className="modalInputsContainer">
                                 <label className="col-md-2">Id:</label>
                                 <input type="text" placeholder="..." className="form-control" id="inputId" value={id} readOnly />
@@ -149,10 +162,11 @@ function Sports() {
                                 <label className="col-md-2">Name:</label>
                                 <input type="text" placeholder="..." className="form-control" id="inputName" value={name} onChange={(event) => setName(event.target.value)} />
                             </div>
+
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={btnCloseModal}>Close</button>
-                            <button type="button" className="btn btn-primary" onClick={ClickAction}>Save changes</button>
+                            <button type="button" className="btn btn-primary" onClick={ClickAction} id="btnActions">Save changes</button>
                         </div>
                     </div>
                 </div>
