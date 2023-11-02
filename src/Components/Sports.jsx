@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import "../Styles/Sports.css";
 import API_URL from "../API_URL.JS";
+import { useRef } from "react";
 
 function Sports() {
     const [data, setData] = useState([]);
     const [id, setId] = useState("");
     const [name, setName] = useState("");
+    const btnCloseModal = useRef(null);
 
     useEffect(() => {
-        const parameter="";
+        const parameter = "";
         fetch(API_URL + `/Sports/GetSports?parameter=${[parameter]}`)
             .then((response) => {
                 if (!response.ok) {
@@ -26,35 +28,71 @@ function Sports() {
 
     const OpenModal = (action, item) => {
         if (action === "New") {
-            document.getElementById("exampleModalLabel").innerText=action;
+            document.getElementById("exampleModalLabel").innerText = action;
             setId("New");
             setName("");
         } else {
             if (action === "Modify") {
-                document.getElementById("exampleModalLabel").innerText=action;
+                document.getElementById("exampleModalLabel").innerText = action;
                 setId(item.Id);
                 setName(item.Name);
             }
         }
     }
 
-    const ClickAction=()=>{
-        fetch(API_URL+"/Sports/SaveSport",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({Id: id , Name: name})
-        })
-        .then(response => response.json())
-        .then(response=>{
-            console.log(response);
-            const newRegister={Id:response, Name:name};
-            setData([...data, newRegister]);
-        })
-        .catch(error=>{
-            console.error("Ha ocurrido un error: ", error);
-        });
+    const ClickAction = () => {
+
+        fetch(API_URL + `/Sports/SaveSport?Id=${id}&Name=${name}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Se ha producido un error");
+                }
+                return response.json();
+            })
+            .then((response) => {
+                if(response==="Modificado"){
+    
+                    data.map(element=>{
+                        if(element.Id===id){
+                            element.Name=name;
+                            setData([...data]);
+                            btnCloseModal.current.click();
+                        }  
+                    })
+                }else{
+                    const newRegister = { Id: response, Name: name };
+                    setData([...data, newRegister]);
+                    btnCloseModal.current.click();
+                }
+            })
+            .catch((error) => {
+                console.error("Error en la solicitud: ", error);
+            });
+
+
+        // fetch(API_URL+"/Sports/SaveSport",{
+        //     method:"POST",
+        //     headers:{
+        //         "Content-Type":"application/json"
+        //     },
+        //     body:JSON.stringify({Id: id , Name: name})
+        // })
+        // .then(response => response.json())
+        // .then(response=>{
+        //     if(response==="Modificado"){
+        //         data.map(prevData=>{
+        //             prevData.Id===data.Id?{...prevData, ...data}:prevData
+        //         })
+        //         btnCloseModal.current.click();
+        //     }else{
+        //         const newRegister={Id:response, Name:name};
+        //         setData([...data, newRegister]);
+        //         btnCloseModal.current.click();
+        //     }
+        // })
+        // .catch(error=>{
+        //     console.error("Ha ocurrido un error: ", error);
+        // });
     }
 
 
@@ -70,7 +108,7 @@ function Sports() {
                     <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal" onClick={() => OpenModal("New", "")}>New</button>
                 </div>
 
-                <table className="table table-hover">
+                <table className="table table-hover table-striped">
                     <thead>
                         <tr>
                             <th scope="col">Id</th>
@@ -113,7 +151,7 @@ function Sports() {
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" ref={btnCloseModal}>Close</button>
                             <button type="button" className="btn btn-primary" onClick={ClickAction}>Save changes</button>
                         </div>
                     </div>

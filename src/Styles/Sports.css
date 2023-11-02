@@ -17,3 +17,6 @@ td button:first-child{
 .modal-body div:not(:first-child){
     margin-top:2%;
 }
+table{
+    margin-top:2%;
+}
