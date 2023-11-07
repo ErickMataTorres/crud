@@ -7,8 +7,23 @@ function Sports() {
     const [data, setData] = useState([]);
     const [id, setId] = useState("");
     const [name, setName] = useState("");
+    const [search,setSearch]=useState("");
     const btnCloseModal = useRef(null);
     const [globalActions, setGlobalActions]=useState("");
+
+    const HandleSearchChange=(event)=>{
+        setSearch(event.target.value);
+        const searchedItems=data.filter((item)=>{
+            return item.Name.toLowerCase().includes(search.toLowerCase());
+        });
+        console.log(searchedItems);
+
+    }
+
+
+
+
+    
 
     useEffect(() => {
         const parameter = "";
@@ -116,7 +131,7 @@ function Sports() {
                 <h1 className="text-center">Sports</h1>
                 <div className="searchContainer">
                     <label>Search:</label>
-                    <input type="text" placeholder="..." className="form-control" />
+                    <input type="text" placeholder="..." className="form-control" onChange={(event)=>HandleSearchChange(event)}/>
                     <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal" onClick={() => OpenModal("New", "")}>New</button>
                 </div>
 
