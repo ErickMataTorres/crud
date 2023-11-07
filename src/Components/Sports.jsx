@@ -7,23 +7,18 @@ function Sports() {
     const [data, setData] = useState([]);
     const [id, setId] = useState("");
     const [name, setName] = useState("");
-    const [search,setSearch]=useState("");
+    // const [search,setSearch]=useState("");
     const btnCloseModal = useRef(null);
     const [globalActions, setGlobalActions]=useState("");
+    const [newArrayData, setNewArrayData]=useState([]);
 
     const HandleSearchChange=(event)=>{
-        setSearch(event.target.value);
-        const searchedItems=data.filter((item)=>{
-            return item.Name.toLowerCase().includes(search.toLowerCase());
-        });
-        console.log(searchedItems);
-
+        const searchTemp=event.target.value;
+        // setSearch(searchTemp);
+        setNewArrayData(data.filter((item)=>{
+            return (item.Id.toString().toLowerCase()+item.Name.toLowerCase()).includes(searchTemp.toLowerCase());
+        }));
     }
-
-
-
-
-    
 
     useEffect(() => {
         const parameter = "";
@@ -36,6 +31,7 @@ function Sports() {
             })
             .then((data) => {
                 setData(data);
+                setNewArrayData(data);
             })
             .catch((error) => {
                 console.error("Error get the data: ", error);
@@ -87,12 +83,14 @@ function Sports() {
                             if (element.Id === id) {
                                 element.Name = name;
                                 setData([...data]);
+                                setNewArrayData([...data]);
                                 btnCloseModal.current.click();
                             }
                         })
                     } else {
                         const newRegister = { Id: response, Name: name };
                         setData([...data, newRegister]);
+                        setNewArrayData([...data, newRegister]);
                         btnCloseModal.current.click();
                     }
                 })
@@ -112,6 +110,7 @@ function Sports() {
                 if(response==="Ok"){
                     const deleteSport=data.filter((prevData)=>prevData.Id!==id);
                     setData(deleteSport);
+                    setNewArrayData(deleteSport);
                     btnCloseModal.current.click();
                 }
             })
@@ -144,7 +143,8 @@ function Sports() {
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map(item => (
+                        {
+                        newArrayData.map(item => (
                             <tr key={item.Id}>
                                 <th scope="row">{item.Id}</th>
                                 <td>{item.Name}</td>
